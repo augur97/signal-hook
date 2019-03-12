@@ -157,8 +157,8 @@ pub mod pipe;
 
 pub use libc::{
     SIGABRT, SIGALRM, SIGBUS, SIGCHLD, SIGCONT, SIGFPE, SIGHUP, SIGILL, SIGINT, SIGIO, SIGKILL,
-    SIGPIPE, SIGPROF, SIGQUIT, SIGSEGV, SIGSTOP, SIGSYS, SIGTERM, SIGTRAP, SIGUSR1, SIGUSR2,
-    SIGWINCH,
+    SIGPIPE, SIGPROF, SIGQUIT, SIGSEGV, SIGSTOP, SIGSYS, SIGTERM, SIGTRAP, SIGTSTP, SIGUSR1,
+    SIGUSR2, SIGWINCH,
 };
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -487,6 +487,15 @@ mod tests {
     fn register_unregister() {
         let signal = unsafe { register(SIGUSR1, || ()).unwrap() };
         // It was there now, so we can unregister
+        assert!(unregister(signal));
+        // The next time unregistering does nothing and tells us so.
+        assert!(!unregister(signal));
+    }
+    #[test]
+    fn register_unregister_c_z() {
+        let signal = unsafe { register(SIGTSTP, || ()).unwrap() };
+        // It was there now, so we can unregister
+        loop {}
         assert!(unregister(signal));
         // The next time unregistering does nothing and tells us so.
         assert!(!unregister(signal));
